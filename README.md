@@ -17,86 +17,52 @@ allprojects {
 ## Step 2. Add the dependency Gradle:
 
 ```
-//Scan Card
-implementation 'com.github.YusufbekIbragimov:SwipeCard:Tag'
+//Swipe Card
+implementation 'com.github.YusufbekIbragimov:SwipeCard:#latest_version'
 ```
 
-## Step 3. Create Application class
+## Step 3. Modify your App Activity or Fragment
 ```
-class App : Application() {
-    override fun onCreate() {
-        super.onCreate()
-        ScanBaseActivity.warmUp(this)
-    }
-}
-```
-## Step 4. Modify your App Activity
-```
-class MainActivity : AppCompatActivity() {
+class MainActivity : ComponentActivity() {
 
-    private lateinit var binding: ActivityMainBinding
-
+    @OptIn(ExperimentalMaterialApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding = ActivityMainBinding.inflate(layoutInflater)
-        setContentView(binding.root)
 
-        binding.cardData.setOnClickListener {
-            startScanActivity()
-        }
-    }
-
-    private fun startScanActivity() {
-
-        val intent = ScanActivity.buildIntent(
-            this,
-            true,
-            null,
-            "Locate your card in box",
-            AppCompatResources.getDrawable(this,R.drawable.ic_flash_on),
-            AppCompatResources.getDrawable(this,R.drawable.ic_flash_off),
+        val list = listOf(
+            TestDataModel(R.drawable.theme4, "Highlight 1", "Description for the highlight one"),
+            TestDataModel(R.drawable.theme5, "Highlight 2", "Description for the highlight two"),
+            TestDataModel(R.drawable.theme7, "Highlight 3", "Description for the highlight three"),
         )
 
-        activityLauncher.launch(intent)
-        //or 
-          /* val intent = ScanActivity.buildIntent(
-                this,
-                true,
-                null,
-                "Поместите карту в рамку",
-                null, //    AppCompatResources.getDrawable(this,R.drawable.ic_flash_on),
-                null, //    AppCompatResources.getDrawable(this,R.drawable.ic_flash_off),
-            )
-            startActivityForResult(intent,ScanActivity.SCAN_REQUEST_CODE)
-            */
+        setContent {
+            Column(
+                modifier = Modifier.fillMaxWidth().height(400.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                SwipeCard(
+                    modifier = Modifier,
+                    list = list,
+                    shadowSide = CardShadowSide.ShadowStart,
+                    orientation = Orientation.Horizontal
+                ) {
+
+                    (it as TestDataModel)
+
+                    DefaultContent(
+                        modifier = Modifier
+                            .wrapContentSize()
+                            .padding(horizontal = 8.dp),
+                        item = TestDataModel(it.sourceImage, it.text, it.subText)
+                    )
+
+                }
+            }
+        }
 
     }
 
-   private val activityLauncher =
-        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result: ActivityResult ->
-            if (result.resultCode == Activity.RESULT_OK) {
-                val intent = result.data
-                val scanResult = ScanActivity.creditCardFromResult(intent)
-                binding.cardData.text = scanResult.toString()
-            }
-        }
-        
-        //or
-        /*  
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        if (ScanActivity.isScanResult(requestCode)) {
-            if (resultCode == Activity.RESULT_OK && data != null) {
-                val scanResult = ScanActivity.creditCardFromResult(data)
-                val resultMap = mutableMapOf<String, String?>()
-                resultMap["card_number"] = scanResult?.number
-                resultMap["expiry_month"] = scanResult?.expiryMonth
-                resultMap["expiry_year"] = scanResult?.expiryYear
-                binding.cardData.text = scanResult.toString()
-            }
-        }
-    }
-    */
 }
 ```
 
