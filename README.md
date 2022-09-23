@@ -74,4 +74,4 @@ class MainActivity : ComponentActivity() {
 
 
 
-For bugs, feature requests, and discussion, please use GitHub Issues. For general questions ONLY, please contact via ![Telegram](t.me.ibragimovyusufbek).
+For bugs, feature requests, and discussion, please use GitHub Issues. For general questions ONLY, please contact via Telegram.
