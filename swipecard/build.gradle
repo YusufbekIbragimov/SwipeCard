@@ -1,6 +1,7 @@
 plugins {
     id 'com.android.library'
     id 'org.jetbrains.kotlin.android'
+    id 'maven-publish'
 }
 
 android {
@@ -52,4 +53,18 @@ dependencies {
     androidTestImplementation "androidx.compose.ui:ui-test-junit4:1.2.1"
     debugImplementation "androidx.compose.ui:ui-tooling:1.2.1"
     debugImplementation "androidx.compose.ui:ui-test-manifest:1.2.1"
+}
+
+afterEvaluate {
+    publishing {
+        publications {
+            release(MavenPublication) {
+                from components.release
+
+                groupId = "com.github.yusufbekibragimov"
+                artifactId = "swipecard"
+                version = "1.0"
+            }
+        }
+    }
 }
