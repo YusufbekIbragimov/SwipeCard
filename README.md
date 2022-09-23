@@ -65,10 +65,12 @@ class MainActivity : ComponentActivity() {
 
 }
 ```
-## Step latest: Result
+## Step 4. Result
 ![ezgif com-gif-maker (1)](https://user-images.githubusercontent.com/83059102/191929944-65174114-3543-42c1-aa6f-db1b88675a08.gif)
 
-### You can set orientaion type
+## You can set orientaion type
 ![ezgif com-gif-maker](https://user-images.githubusercontent.com/83059102/191929986-8d139851-e91b-408d-b9bb-dada36166bab.gif)
 
-For bugs, feature requests, and discussion, please use GitHub Issues. For general questions ONLY, please contact via Telegram.
+
+
+For bugs, feature requests, and discussion, please use GitHub Issues. For general questions ONLY, please contact via ![Telegram](t.me.ibragimovyusufbek).
