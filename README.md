@@ -1,4 +1,4 @@
-![Release](https://jitpack.io/v/Nurdiyor/CardScanLib.svg)
+![Release](https://jitpack.io/v/YusufbekIbragimov/SwipeCard.svg)
  
 # SwipeCard
 To get a Git project into your build:
@@ -18,9 +18,7 @@ allprojects {
 
 ```
 //Scan Card
-implementation 'com.github.Nurdiyor:CardScanLib:latest_version'
-//TensorFlow
-implementation 'org.tensorflow:tensorflow-lite:2.9.0'
+implementation 'com.github.YusufbekIbragimov:SwipeCard:Tag'
 ```
 
 ## Step 3. Create Application class
