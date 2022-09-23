@@ -1,6 +1,7 @@
 ![Release](https://jitpack.io/v/YusufbekIbragimov/SwipeCard.svg)
  
-# SwipeCard
+# SwipeCard with Jitpack Compose
+
 To get a Git project into your build:
 
 ## Step 1. Add the JitPack repository to your build file
