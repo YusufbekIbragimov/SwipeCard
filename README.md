@@ -38,27 +38,23 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             Column(
-                modifier = Modifier.fillMaxWidth().height(400.dp),
+                modifier = Modifier.fillMaxSize(),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
             ) {
+
                 SwipeCard(
                     modifier = Modifier,
-                    list = list,
-                    shadowSide = CardShadowSide.ShadowStart,
-                    orientation = Orientation.Horizontal
-                ) {
-
-                    (it as TestDataModel)
-
+                    itemsList = list
+                ) { dataModel ->
                     DefaultContent(
                         modifier = Modifier
                             .wrapContentSize()
                             .padding(horizontal = 8.dp),
-                        item = TestDataModel(it.sourceImage, it.text, it.subText)
+                        item = dataModel
                     )
-
                 }
+                
             }
         }
 
