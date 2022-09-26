@@ -1,11 +1,19 @@
 package uz.yusufbekibragimov.swipecard
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.gestures.Orientation
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.*
-import androidx.compose.runtime.*
-import androidx.compose.ui.*
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.FractionalThreshold
+import androidx.compose.material.ThresholdConfig
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.Dp
@@ -15,7 +23,7 @@ import kotlin.math.abs
 /**
  * A stack of cards that can be dragged.
  *
- * @param list Cards to show in the stack.
+ * @param itemsList Cards to show in the stack.
  * @param heightCard Card's height for setting.
  * @param betweenMargin it is for set margin Card's between.
  * @param onSwipeLeft Lambda that executes when the animation of swiping left is finished.
@@ -30,124 +38,91 @@ import kotlin.math.abs
  *
  * @author Ibragimov Yusufbek
  */
+@SuppressLint("MutableCollectionMutableState")
 @ExperimentalMaterialApi
 @Composable
-fun SwipeCard(
+fun <T> SwipeCard(
     modifier: Modifier = Modifier,
-    list: List<Any>,
-    heightCard: Dp = 100.dp,
-    betweenMargin: Dp = 18.dp,
-    onSwipeLeft: (item: Any) -> Unit = {},
-    onSwipeRight: (item: Any) -> Unit = {},
-    onSwipeTop: (item: Any) -> Unit = {},
-    onSwipeBottom: (item: Any) -> Unit = {},
-    onEmptyStack: (lastItem: Any) -> Unit = {},
+    itemsList: MutableList<T>,
+    heightCard: Dp = 136.dp,
+    betweenMargin: Dp = 24.dp,
+    onSwipeLeft: (item: T) -> Unit = {},
+    onSwipeRight: (item: T) -> Unit = {},
+    onSwipeTop: (item: T) -> Unit = {},
+    onSwipeBottom: (item: T) -> Unit = {},
+    onEmptyStack: () -> Unit = {},
     orientation: Orientation = Orientation.Horizontal,
     shadowSide: CardShadowSide = CardShadowSide.ShadowBottom,
     thresholdConfig: (Float, Float) -> ThresholdConfig = { _, _ -> FractionalThreshold(0.2f) },
-    content: @Composable ((item: Any) -> Unit)
+    content: @Composable ((item: T) -> Unit)
 ) {
 
-    val itemsList by remember { mutableStateOf(arrayListOf<Any>()) }
-    itemsList.addAll(list)
-
-    val currentIndex by remember { mutableStateOf(list.size - 1) }
+    val currentIndex by remember { mutableStateOf(itemsList.size - 1) }
     val cardStackController = rememberCardStackController((heightCard + (betweenMargin * 3)))
 
-    if (currentIndex == -1) onEmptyStack(list.last())
+    cardStackController.onSwipe = { swipeType ->
+        itemsList.fistToLast()
 
-    cardStackController.onSwipeTop = {
-        onSwipeTop(itemsList[currentIndex])
-        val item = itemsList[list.size - 1]
-        itemsList.removeAt(list.size - 1)
-        itemsList.add(0, item)
+        when (swipeType) {
+            SwipeSide.TOP -> onSwipeTop(itemsList[currentIndex])
+            SwipeSide.START -> onSwipeLeft(itemsList[currentIndex])
+            SwipeSide.END -> onSwipeRight(itemsList[currentIndex])
+            SwipeSide.BOTTOM -> onSwipeBottom(itemsList[currentIndex])
+        }
     }
 
-    cardStackController.onSwipeBottom = {
-        onSwipeBottom(itemsList[currentIndex])
-        val item = itemsList[list.size - 1]
-        itemsList.removeAt(list.size - 1)
-        itemsList.add(0, item)
-    }
-
-    cardStackController.onSwipeLeft = {
-        onSwipeLeft(itemsList[currentIndex])
-        val item = itemsList[list.size - 1]
-        itemsList.removeAt(list.size - 1)
-        itemsList.add(0, item)
-    }
-
-    cardStackController.onSwipeRight = {
-        onSwipeRight(itemsList[currentIndex])
-        val item = itemsList[list.size - 1]
-        itemsList.removeAt(list.size - 1)
-        itemsList.add(0, item)
-    }
-
-    Box(
-        modifier = modifier
-            .height((heightCard + (betweenMargin * 3)))
-    ) {
+    if (itemsList.isNotEmpty()) {
 
         Box(
-            modifier = Modifier
-                .padding(
-                    bottom = if(shadowSide == CardShadowSide.ShadowBottom) ((1f - (10 - cardStackController.scale.value * 10)) * betweenMargin.value).dp else 0.dp,
-                    start = if(shadowSide == CardShadowSide.ShadowStart) ((1f - (10 - cardStackController.scale.value * 10)) * betweenMargin.value).dp else 0.dp,
-                    top = if(shadowSide == CardShadowSide.ShadowTop) ((1f - (10 - cardStackController.scale.value * 10)) * betweenMargin.value).dp else 0.dp,
-                    end = if(shadowSide == CardShadowSide.ShadowEnd) ((1f - (10 - cardStackController.scale.value * 10)) * betweenMargin.value).dp else 0.dp,
-                )
-                .padding(horizontal = ((1f + (10 - cardStackController.scale.value * 10)) * 16f).dp)
-                .align(Alignment.Center)
-                .height(heightCard)
-                .shadow(0.dp, RoundedCornerShape(8.dp))
+            modifier = modifier
+                .height((heightCard + (betweenMargin * 2.5f)))
         ) {
-            content(
-                if (currentIndex < 2) itemsList[list.size + currentIndex - 2] else itemsList[abs(
-                    currentIndex - 2
-                )]
-            )
+
+            Box(
+                modifier = Modifier
+                    .shadowPadding(shadowSide, betweenMargin, cardStackController, 1f)
+                    .shadowHorizontalPadding(16.dp, cardStackController, 1f)
+                    .align(Alignment.Center)
+                    .height(heightCard)
+                    .shadow(0.dp, RoundedCornerShape(8.dp))
+            ) {
+                content(
+                    if (currentIndex < 2) itemsList[itemsList.size + currentIndex - 2]
+                    else itemsList[abs(currentIndex - 2)]
+                )
+            }
+
+            Box(
+                modifier = Modifier
+                    .shadowPadding(shadowSide, betweenMargin, cardStackController, 2f)
+                    .shadowHorizontalPadding(16.dp, cardStackController, 0f)
+                    .align(Alignment.Center)
+                    .height(heightCard)
+                    .shadow(0.dp, RoundedCornerShape(8.dp))
+            ) { content(itemsList[abs(currentIndex - 1)]) }
+
+            Box(
+                modifier = Modifier
+                    .shadowPaddingLayerThree(shadowSide, betweenMargin)
+                    .align(Alignment.Center)
+                    .height(heightCard)
+                    .draggableStack(
+                        controller = cardStackController,
+                        orientation = orientation,
+                        thresholdConfig = thresholdConfig
+                    )
+                    .moveTo(
+                        x = if (orientation == Orientation.Horizontal) cardStackController.offsetX.value else 0f,
+                        y = if (orientation == Orientation.Horizontal) 0f else cardStackController.offsetY.value
+                    )
+                    .graphicsLayer(
+                        rotationZ = cardStackController.rotation.value,
+                    )
+                    .shadow(0.dp, RoundedCornerShape(8.dp))
+            ) { content(itemsList[currentIndex]) }
+
         }
 
-        Box(
-            modifier = Modifier
-                .padding(
-                    bottom = if (shadowSide == CardShadowSide.ShadowBottom) ((2f - (10 - cardStackController.scale.value * 10)) * betweenMargin.value).dp else 0.dp,
-                    start = if (shadowSide == CardShadowSide.ShadowStart) ((2f - (10 - cardStackController.scale.value * 10)) * betweenMargin.value).dp else 0.dp,
-                    end = if (shadowSide == CardShadowSide.ShadowEnd) ((2f - (10 - cardStackController.scale.value * 10)) * betweenMargin.value).dp else 0.dp,
-                    top = if (shadowSide == CardShadowSide.ShadowTop) ((2f - (10 - cardStackController.scale.value * 10)) * betweenMargin.value).dp else 0.dp,
-                )
-                .padding(horizontal = ((0f + (10 - cardStackController.scale.value * 10)) * 16f).dp)
-                .align(Alignment.Center)
-                .height(heightCard)
-                .shadow(0.dp, RoundedCornerShape(8.dp))
-        ) { content(itemsList[abs(currentIndex - 1)]) }
-
-        Box(
-            modifier = Modifier
-                .padding(
-                    bottom = if (shadowSide==CardShadowSide.ShadowBottom) betweenMargin * 2 else 0.dp,
-                    end = if (shadowSide==CardShadowSide.ShadowEnd) betweenMargin * 2 else 0.dp,
-                    start = if (shadowSide==CardShadowSide.ShadowStart) betweenMargin * 2 else 0.dp,
-                    top = if (shadowSide==CardShadowSide.ShadowTop) betweenMargin * 2 else 0.dp,
-                )
-                .align(Alignment.Center)
-                .height(heightCard)
-                .draggableStack(
-                    controller = cardStackController,
-                    orientation = orientation,
-                    thresholdConfig = thresholdConfig
-                )
-                .moveTo(
-                    x = if(orientation == Orientation.Horizontal) cardStackController.offsetX.value else 0f,
-                    y = if(orientation == Orientation.Horizontal) 0f else cardStackController.offsetY.value
-                )
-                .graphicsLayer(
-                    rotationZ = cardStackController.rotation.value,
-                )
-                .shadow(0.dp, RoundedCornerShape(8.dp))
-        ) { content(itemsList[currentIndex]) }
-
-    }
+    } else onEmptyStack()
 
 }

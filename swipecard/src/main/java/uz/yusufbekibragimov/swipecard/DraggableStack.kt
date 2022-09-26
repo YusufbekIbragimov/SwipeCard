@@ -42,8 +42,6 @@ open class CardStackController(
      * Anchors
      */
     val right = Offset(screenWidth, 0f)
-    val left = Offset(-screenWidth, 0f)
-    val top = Offset(0f, -screenHeight)
     val bottom = Offset(0f, screenHeight)
     val center = Offset(0f, 0f)
 
@@ -68,18 +66,14 @@ open class CardStackController(
      */
     val scale = Animatable(0.9f)
 
-    var onSwipeLeft: () -> Unit = {}
-    var onSwipeRight: () -> Unit = {}
-
-    var onSwipeTop: () -> Unit = {}
-    var onSwipeBottom: () -> Unit = {}
+    var onSwipe: (swipeSide: SwipeSide) -> Unit = {}
 
     fun swipeLeft() {
         scope.apply {
             launch {
-                offsetX.animateTo(-screenWidth, tween(100))
+                offsetX.animateTo(-screenWidth, tween(90))
 
-                onSwipeLeft()
+                onSwipe(SwipeSide.START)
 
                 // After the animation of swiping return back to Center to make it look like a cycle
                 launch {
@@ -97,7 +91,7 @@ open class CardStackController(
             }
 
             launch {
-                scale.animateTo(1f, tween(100))
+                scale.animateTo(1f, tween(90))
             }
         }
 
@@ -106,9 +100,9 @@ open class CardStackController(
     fun swipeRight() {
         scope.apply {
             launch {
-                offsetX.animateTo(screenWidth, tween(100))
+                offsetX.animateTo(screenWidth, tween(90))
 
-                onSwipeRight()
+                onSwipe(SwipeSide.END)
 
                 // After the animation return back to Center to make it look like a cycle
                 launch {
@@ -126,7 +120,7 @@ open class CardStackController(
             }
 
             launch {
-                scale.animateTo(1f, tween(100))
+                scale.animateTo(1f, tween(90))
             }
         }
 
@@ -135,9 +129,9 @@ open class CardStackController(
     fun swipeTop() {
         scope.apply {
             launch {
-                offsetY.animateTo(-screenHeight*6, tween(100))
+                offsetY.animateTo(-screenHeight * 6, tween(90))
 
-                onSwipeTop()
+                onSwipe(SwipeSide.TOP)
 
                 // After the animation return back to Center to make it look like a cycle
                 launch {
@@ -155,7 +149,7 @@ open class CardStackController(
             }
 
             launch {
-                scale.animateTo(1f, tween(100))
+                scale.animateTo(1f, tween(90))
             }
         }
 
@@ -164,9 +158,9 @@ open class CardStackController(
     fun swipeBottom() {
         scope.apply {
             launch {
-                offsetY.animateTo(screenHeight*6, tween(100))
+                offsetY.animateTo(screenHeight * 6, tween(90))
 
-                onSwipeBottom()
+                onSwipe(SwipeSide.BOTTOM)
 
                 // After the animation return back to Center to make it look like a cycle
                 launch {
@@ -184,7 +178,7 @@ open class CardStackController(
             }
 
             launch {
-                scale.animateTo(1f, tween(100))
+                scale.animateTo(1f, tween(90))
             }
         }
 
@@ -193,16 +187,16 @@ open class CardStackController(
     fun returnCenter() {
         scope.apply {
             launch {
-                offsetX.animateTo(center.x, tween(100))
+                offsetX.animateTo(center.x, tween(90))
             }
             launch {
-                offsetY.animateTo(center.y, tween(100))
+                offsetY.animateTo(center.y, tween(90))
             }
             launch {
-                rotation.animateTo(0f, tween(100))
+                rotation.animateTo(0f, tween(90))
             }
             launch {
-                scale.animateTo(0.9f, tween(100))
+                scale.animateTo(0.9f, tween(90))
             }
         }
     }
@@ -222,8 +216,7 @@ fun rememberCardStackController(
 
     val scope = rememberCoroutineScope()
 
-    val screenWidth =
-        with(LocalDensity.current) { LocalConfiguration.current.screenWidthDp.dp.toPx() }
+    val screenWidth = with(LocalDensity.current) { LocalConfiguration.current.screenWidthDp.dp.toPx() }
 
     return remember {
         CardStackController(
@@ -242,8 +235,6 @@ fun rememberCardStackController(
  * @param controller The controller of the [draggableStack].
  * @param thresholdConfig Specifies where the threshold between the predefined Anchors is. This is represented as a lambda
  * that takes two float and returns the threshold between them in the form of a [ThresholdConfig].
- * @param velocityThreshold The threshold (in dp per second) that the end velocity has to exceed
- * in order to swipe, even if the positional [thresholds] have not been reached.
  */
 @OptIn(ExperimentalMaterialApi::class)
 fun Modifier.draggableStack(
@@ -265,18 +256,18 @@ fun Modifier.draggableStack(
             onDragEnd = {
                 if (orientation == Orientation.Horizontal) {
                     if (controller.offsetX.value <= 0f) {
-                        if (controller.offsetX.value > -controller.threshold) controller.returnCenter()
+                        if (controller.offsetX.value > -72) controller.returnCenter()
                         else controller.swipeLeft()
                     } else {
-                        if (controller.offsetX.value < controller.threshold) controller.returnCenter()
+                        if (controller.offsetX.value < 72) controller.returnCenter()
                         else controller.swipeRight()
                     }
                 } else {
                     if (controller.offsetY.value <= 0f) {
-                        if (controller.offsetY.value > -controller.threshold) controller.returnCenter()
+                        if (controller.offsetY.value > -72) controller.returnCenter()
                         else controller.swipeTop()
                     } else {
-                        if (controller.offsetY.value < controller.threshold) controller.returnCenter()
+                        if (controller.offsetY.value < 72) controller.returnCenter()
                         else controller.swipeBottom()
                     }
                 }
