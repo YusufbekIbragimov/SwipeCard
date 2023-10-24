@@ -1,4 +1,5 @@
 ![Release](https://jitpack.io/v/YusufbekIbragimov/SwipeCard.svg)
+![Downloads](https://jitpack.io/v/YusufbekIbragimov/SwipeCard/month.svg)
  
 # SwipeCard with Jitpack Compose
 
